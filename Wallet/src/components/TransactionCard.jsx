@@ -1,163 +1,146 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-const transactions = [
-  {
-    id: 1,
-    date: "25 Jul 12:30",
-    amount: -10,
-    name: "YouTube",
-    method: "VISA **3254",
-    category: "Subscription",
-    icon: (
-      <div className="w-8 h-8 rounded-lg bg-red-500 flex items-center justify-center">
-        ▶
-      </div>
-    ),
-  },
-  {
-    id: 2,
-    date: "26 Jul 15:00",
-    amount: -150,
-    name: "Reserved",
-    method: "Mastercard **2154",
-    category: "Shopping",
-    icon: (
-      <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-white">
-        •••
-      </div>
-    ),
-  },
-  {
-    id: 3,
-    date: "27 Jul 9:00",
-    amount: -80,
-    name: "Yaposhka",
-    method: "Mastercard **2154",
-    category: "Cafe & Restaurants",
-    icon: (
-      <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
-        🍣
-      </div>
-    ),
-  },
-];
-
-export default function TransactionCard({ adminMode }) {
-  const [approved, setApproved] = useState({});
+export default function TransactionCard({ isAdmin, transactions, onApprove, justApproved }) {
   const [hoveredRow, setHoveredRow] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editNote, setEditNote] = useState("");
+
+  // Track which rows should animate (just switched from admin → user with changes)
+  const [animatingIds, setAnimatingIds] = useState(new Set());
+
+  const prevIsAdmin = useRef(isAdmin);
+
+  useEffect(() => {
+    // Detect the moment we switch from admin to user
+    if (prevIsAdmin.current && !isAdmin && justApproved.size > 0) {
+      setAnimatingIds(new Set(justApproved));
+      setTimeout(() => setAnimatingIds(new Set()), 1800);
+    }
+    prevIsAdmin.current = isAdmin;
+  }, [isAdmin, justApproved]);
+
+  const startEdit = (tx) => {
+    setEditingId(tx.id);
+    setEditNote(tx.note || "");
+  };
 
   return (
-    <div className="w-full">
-      <div className="bg-white rounded-3xl border border-green-100 shadow-xl shadow-green-100/50 p-5 sm:p-7">
+   <div className="h-full w-full bg-[#F7F8FA] rounded-[28px] p-6 border border-[#E5E7EB] flex flex-col">
 
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-800">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-black">
             Recent Transactions
           </h2>
+          {isAdmin && (
+            <span className="text-xs text-slate-400 dark:text-slate-500 italic">Admin view — approve or edit rows</span>
+          )}
         </div>
 
-        {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full min-w-[600px]">
             <thead>
               <tr>
                 {["Date", "Amount", "Payment", "Method", "Category", "Status"].map((h) => (
-                  <th
-                    key={h}
-                    className="text-left text-xs font-bold text-green-600 uppercase pb-3"
-                  >
+                  <th key={h} className="text-left text-xs font-bold text-black uppercase pb-3 pr-4">
                     {h}
                   </th>
                 ))}
-                {adminMode && (
-                  <th className="text-left text-xs font-bold text-green-600 uppercase pb-3">
-                    Action
-                  </th>
+                {isAdmin && (
+                  <th className="text-left text-xs font-bold text-green-600 uppercase pb-3">Actions</th>
                 )}
               </tr>
             </thead>
 
             <tbody>
-              {transactions.map((tx, i) => (
-                <tr
-                  key={tx.id}
-                  className="border-t border-green-50 transition"
-                  style={{
-                    background:
-                      hoveredRow === i ? "#f0fdf4" : "transparent",
-                  }}
-                  onMouseEnter={() => setHoveredRow(i)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                >
-                  {/* Date */}
-                  <td className="py-3">{tx.date}</td>
+              {transactions.map((tx, i) => {
+                const isAnimating = animatingIds.has(tx.id);
+                const isEditing = editingId === tx.id;
 
-                  {/* Amount */}
-                  <td className="py-3 font-semibold text-slate-700">
-                    - ${Math.abs(tx.amount)}
-                  </td>
+                return (
+                  <AnimatePresence key={tx.id} mode="wait">
+                    <motion.tr
+                      key={tx.id + tx.status}
+                      initial={isAnimating ? { backgroundColor: "#bbf7d0" } : { opacity: 0.85 }}
+                      animate={{ backgroundColor: "rgba(0,0,0,0)", opacity: 1 }}
+                      transition={{ duration: isAnimating ? 1.4 : 0.3 }}
+                      className={`border-t border-slate-100 dark:border-slate-800 transition-colors ${
+                        hoveredRow === i ? "bg-slate-50 dark:bg-slate-800/50" : ""
+                      }`}
+                      onMouseEnter={() => setHoveredRow(i)}
+                      onMouseLeave={() => setHoveredRow(null)}
+                    >
+                      {/* Date */}
+                      <td className="py-3 pr-4 text-sm text-black whitespace-nowrap">{tx.date}</td>
 
-                  {/* Payment */}
-                  <td className="py-3 flex items-center gap-2">
-                    {tx.icon}
-                    {tx.name}
-                  </td>
+                      {/* Amount */}
+                      <td className="py-3 pr-4 font-semibold text-black  text-sm">
+                        - ${Math.abs(tx.amount)}
+                      </td>
 
-                  {/* Method */}
-                  <td className="py-3 text-slate-500">
-                    {tx.method}
-                  </td>
+                      {/* Payment name */}
+                      <td className="py-3 pr-4 text-sm dark:text-black flex items-center gap-2">
+                        💳 {tx.name}
+                      </td>
 
-                  {/* Category */}
-                  <td className="py-3">
-                    <span className="bg-green-50 text-green-700 px-2 py-1 rounded-lg text-xs font-semibold">
-                      {tx.category}
-                    </span>
-                  </td>
+                      {/* Method */}
+                      <td className="py-3 pr-4 text-sm text-black">{tx.method}</td>
 
-                  {/* Status */}
-                  <td className="py-3">
-                    {approved[tx.id] ? (
-                      <span className="text-green-600 text-xs font-semibold">
-                        Approved
-                      </span>
-                    ) : (
-                      <span className="text-yellow-500 text-xs font-semibold">
-                        Pending
-                      </span>
-                    )}
-                  </td>
+                      {/* Category */}
+                      <td className="py-3 pr-4">
+                        <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-lg text-xs font-semibold">
+                          {tx.category}
+                        </span>
+                      </td>
 
-                  {/* Admin Action */}
-                  {adminMode && (
-                    <td className="py-3">
-                      {!approved[tx.id] && (
-                        <button
-                          onClick={() =>
-                            setApproved((prev) => ({
-                              ...prev,
-                              [tx.id]: true,
-                            }))
-                          }
-                          className="bg-green-600 text-white text-xs px-3 py-1 rounded-lg hover:bg-green-700"
-                        >
-                          Approve
-                        </button>
+                      {/* Status */}
+                      <td className="py-3 pr-4 bg-slate-100">
+                        <AnimatePresence mode="wait">
+                          <motion.span
+                            key={tx.status}
+                            initial={{ opacity: 0, y: -6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 6 }}
+                            transition={{ duration: 0.25 }}
+                            className={`text-xs font-bold px-2 py-1 rounded-md ${
+                              tx.status === "Completed"
+                                ? "text-green-600 dark:text-green-400"
+                                : " text-yellow-600 dark:text-yellow-400"
+                            }`}
+                          >
+                            {tx.status === "Completed" ? "✓ Completed" : "⏳ Pending"}
+                          </motion.span>
+                        </AnimatePresence>
+                      </td>
+
+                      {/* Admin actions */}
+                      {isAdmin && (
+                        <td className="py-3">
+                          <div className="flex items-center gap-2">
+                            {tx.status === "Pending" && (
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => onApprove(tx.id)}
+                                className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors"
+                              >
+                                Approve
+                              </motion.button>
+                            )}
+                            {tx.status === "Completed" && (
+                              <span className="text-green-500 text-xs font-semibold">✓ Done</span>
+                            )}
+                          </div>
+                        </td>
                       )}
-                    </td>
-                  )}
-                </tr>
-              ))}
+                    </motion.tr>
+                  </AnimatePresence>
+                );
+              })}
             </tbody>
           </table>
         </div>
-
-        {/* Bottom note */}
-        <p className="text-center text-xs text-slate-400 mt-4">
-          Transaction history · Demo
-        </p>
       </div>
-    </div>
+  
   );
 }

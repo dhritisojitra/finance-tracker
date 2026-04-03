@@ -1,136 +1,140 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+
 import BalanceCard from "./BalanceCard";
 import StatsCard from "./StatsCard";
 import BudgetCard from "./BudgetCard";
 import TransactionCard from "./TransactionCard";
+import SavingsCard from "./SavingsCard";
 
 export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
+  const [transactions, setTransactions] = useState([
+    { id: 1, date: "25 Jul 12:30", amount: -10, name: "YouTube", method: "VISA **3254", category: "Subscription", status: "Completed" },
+    { id: 2, date: "26 Jul 15:00", amount: -150, name: "Reserved", method: "Mastercard **2154", category: "Shopping", status: "Pending" },
+    { id: 3, date: "27 Jul 9:00", amount: -80, name: "Yaposhka", method: "Mastercard **2154", category: "Cafe & Restaurants", status: "Completed" },
+  ]);
+
+  const [justApproved, setJustApproved] = useState(new Set());
+
+  const handleApprove = (id) => {
+    setTransactions(prev =>
+      prev.map(t => t.id === id ? { ...t, status: "Completed" } : t)
+    );
+    setJustApproved(prev => new Set([...prev, id]));
+    setTimeout(() => setJustApproved(new Set()), 2000);
+  };
+
   useEffect(() => {
-    const root = document.documentElement;
-    darkMode
-      ? root.classList.add("dark")
-      : root.classList.remove("dark");
+    document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
   return (
-    <div className="
-      min-h-screen p-4 sm:p-6
-      bg-gradient-to-br from-green-50 via-emerald-50 to-slate-100
-      dark:from-slate-900 dark:via-slate-800 dark:to-slate-900
-      transition-colors duration-300
-    ">
+    <div className="min-h-screen w-full bg-[#EEF2F7] dark:bg-slate-950 transition-colors duration-300">
 
-      {/* 🔝 HEADER */}
-      <div className="
-        flex flex-col sm:flex-row
-        sm:items-center sm:justify-between
-        gap-4 mb-6
-      ">
+      {/* HEADER */}
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-8 py-4">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
+            {isAdmin ? "Admin Dashboard" : "Welcome back, Adaline!"}
+          </h1>
+          <p className="text-slate-400 text-sm">
+            {isAdmin ? "Approving requests" : "Manage your finances smartly"}
+          </p>
+        </div>
 
-        <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white">
-          Finance Dashboard
-        </h1>
+        <div className="flex items-center gap-3">
 
-        {/* Buttons */}
-        <div className="flex flex-wrap gap-2">
-
-          {/* Theme */}
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="
-              px-3 py-2 sm:px-4 text-xs sm:text-sm font-semibold rounded-xl
-              bg-white text-slate-700 border border-slate-200
-              hover:bg-slate-100
-              dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:hover:bg-slate-700
-              transition
-            "
-          >
-            {darkMode ? "Light ☀️" : "Dark 🌙"}
-          </button>
-
-          {/* Admin */}
+          {/* Admin Toggle */}
           <button
             onClick={() => setIsAdmin(!isAdmin)}
-            className="
-              px-3 py-2 sm:px-4 text-xs sm:text-sm font-semibold rounded-xl
-              bg-green-600 text-white hover:bg-green-700 transition
-            "
+            className={`w-12 h-6 rounded-full relative transition ${isAdmin ? "bg-green-500" : "bg-slate-300"}`}
           >
-            {isAdmin ? "User Mode" : "Admin Mode"}
+            <motion.div
+              layout
+              className="w-4 h-4 bg-white rounded-full absolute top-1"
+              style={{ left: isAdmin ? 26 : 4 }}
+            />
           </button>
 
+          {/* Dark Mode */}
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className={`w-12 h-6 rounded-full relative transition ${darkMode ? "bg-green-500" : "bg-slate-300"}`}
+          >
+            <motion.div
+              layout
+              className="w-4 h-4 bg-white rounded-full absolute top-1 flex items-center justify-center text-[8px]"
+              style={{ left: darkMode ? 26 : 4 }}
+            >
+              {darkMode ? "🌙" : "☀️"}
+            </motion.div>
+          </button>
+
+          <img
+            src="https://i.pravatar.cc/150?u=adaline"
+            className="w-9 h-9 rounded-full border border-slate-200"
+            alt="profile"
+          />
         </div>
-      </div>
+      </header>
 
-      {/* 🧱 GRID */}
-      <div className="
-        grid grid-cols-1
-        lg:grid-cols-3
-        xl:grid-cols-4
-        gap-4 sm:gap-6
-      ">
+      {/* MAIN */}
+      <main className="w-full max-w-none px-4 md:px-8 pb-8 space-y-6">
 
-        {/* LEFT AREA */}
-        <div className="
-          flex flex-col gap-4 sm:gap-6
-          lg:col-span-2 xl:col-span-3
-        ">
+        {/* TOP ROW */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-          {/* TOP ROW */}
-          <div className="
-            grid grid-cols-1
-            md:grid-cols-3
-            gap-4 sm:gap-6
-          ">
-
-            {/* Balance */}
-            <div className="md:col-span-2">
+          {/* Balance */}
+          <div className="lg:col-span-2 flex">
+            <div className="w-full h-full">
               <BalanceCard />
             </div>
-
-            {/* Placeholder */}
-            <div className="
-              hidden md:flex
-              items-center justify-center
-              bg-white dark:bg-slate-800
-              border border-slate-100 dark:border-slate-700
-              rounded-3xl text-slate-400 text-sm
-            ">
-              Add Widget
-            </div>
-
           </div>
-
-          {/* Stats */}
-          <StatsCard />
 
           {/* Transactions */}
-          <TransactionCard isAdmin={isAdmin} />
-
-        </div>
-
-        {/* RIGHT SIDE */}
-        <div className="flex flex-col gap-4 sm:gap-6">
-
-          <BudgetCard />
-
-          {/* Hide on small screens */}
-          <div className="
-            hidden sm:flex
-            h-40 items-center justify-center
-            bg-white dark:bg-slate-800
-            border border-slate-100 dark:border-slate-700
-            rounded-3xl text-slate-400 text-sm
-          ">
-            Future Widget
+          <div className="lg:col-span-3 flex">
+            <div className="w-full h-full">
+              <TransactionCard
+                isAdmin={isAdmin}
+                transactions={transactions}
+                onApprove={handleApprove}
+                justApproved={justApproved}
+              />
+            </div>
           </div>
 
         </div>
 
-      </div>
+        {/* MIDDLE ROW */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+          {/* Stats */}
+          <div className="lg:col-span-3 flex">
+            <div className="w-full h-full">
+              <StatsCard />
+            </div>
+          </div>
+
+          {/* Budget */}
+          <div className="lg:col-span-2 flex">
+            <div className="w-full h-full">
+              <BudgetCard />
+            </div>
+          </div>
+
+        </div>
+
+        {/* BOTTOM ROW */}
+        <div className="w-full">
+          
+            <SavingsCard />
+          
+        </div>
+
+      </main>
     </div>
   );
 }

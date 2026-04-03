@@ -189,11 +189,11 @@ export default function StatsCard() {
   const net          = totalIncome - totalExpense;
 
   return (
-    <div className="w-full  p-4 sm:p-8">
-      <div className="w-full max-w-2xl">
+    
+      <div className="h-full">
 
         {/* Card */}
-        <div className="bg-white rounded-3xl border border-green-100 shadow-xl shadow-green-100/50 p-5 sm:p-6">
+        <div className="h-full bg-white rounded-3xl border border-green-100 p-5 sm:p-6">
 
           {/* Header */}
           <div className="flex flex-wrap items-center gap-3 mb-5">
@@ -263,6 +263,6 @@ export default function StatsCard() {
           Financial overview · April 2026
         </p>
       </div>
-    </div>
+
   );
 }
