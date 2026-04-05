@@ -152,7 +152,7 @@ export default function BudgetCard() {
                 </span>
                 <div className="flex">
                   <span className="text-xl font-black text-slate-800">
-                    $<AnimNum value={total} />
+                    ₹<AnimNum value={total} />
                   </span>
                   <span className="text-sm text-slate-300">.00</span>
                 </div>
@@ -161,7 +161,7 @@ export default function BudgetCard() {
           </div>
         </div>
 
-        {/* 🔥 Breakdown Panel */}
+        {/* Breakdown Panel */}
         <div
           className={`overflow-hidden transition-all duration-300 ${
             showBreakdown ? "max-h-60 mt-4 opacity-100" : "max-h-0 opacity-0"
@@ -172,7 +172,7 @@ export default function BudgetCard() {
               <div key={c.label} className="flex justify-between text-sm">
                 <span className="text-slate-600">{c.label}</span>
                 <span className="font-semibold text-slate-800">
-                  ${c.amount.toLocaleString()} (
+                  ₹{c.amount.toLocaleString()} (
                   {((c.amount / total) * 100).toFixed(0)}%)
                 </span>
               </div>
@@ -180,10 +180,6 @@ export default function BudgetCard() {
           </div>
         </div>
       </div>
-
-      <p className="text-center text-xs text-slate-400 mt-3">
-        Monthly budget · April 2026
-      </p>
     </div>
   );
 }

@@ -34,7 +34,7 @@ const allData = {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const fmt = (n) =>
-  "$" + Math.round(n).toLocaleString("en-US");
+  "₹" + Math.round(n).toLocaleString("en-US");
 
 const sum = (arr) => arr.reduce((a, b) => a + b, 0);
 
@@ -258,10 +258,6 @@ export default function StatsCard() {
             />
           </div>
         </div>
-
-        <p className="text-center text-xs text-slate-400 mt-3 tracking-wide">
-          Financial overview · April 2026
-        </p>
       </div>
 
   );

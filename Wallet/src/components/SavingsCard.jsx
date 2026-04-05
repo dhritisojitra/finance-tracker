@@ -1,54 +1,54 @@
-// SavingsCard.jsx
 import { motion } from "framer-motion";
 
 export default function SavingsCard({
-  title = "Vacation Fund",
-  balance = 8420,
-  goal = 12000,
-  monthly = 1200,
+  title,
+  balance,
+  goal,
+  monthly,
+  onDelete,
 }) {
   const progress = Math.min((balance / goal) * 100, 100);
   const remaining = goal - balance;
-  const monthsLeft = Math.ceil(remaining / monthly);
+  const monthsLeft = monthly > 0 ? Math.ceil(remaining / monthly) : 0;
 
   return (
-    <div className="w-full bg-[#F7F8FA] rounded-[28px] p-6 border border-[#E5E7EB]">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-slate-800">{title}</h3>
-        <span className="text-sm text-slate-400">{progress.toFixed(0)}%</span>
-      </div>
+    <div className="w-full bg-white  rounded-[28px] p-6 border border-[#E5E7EB] dark:border-slate-700 relative min-h-[260px] flex flex-col justify-between">
 
-      {/* Progress Ring */}
-      <div className="flex items-center justify-center my-6">
-        <div className="relative w-36 h-36">
+      {/* Delete */}
+      <button
+        onClick={onDelete}
+        className="absolute top-3 right-4 text-black hover:text-red-500"
+      >
+        ✕
+      </button>
+
+      {/* Title */}
+      <h3 className="text-lg font-semibold text-slate-800 dark:text-black mb-2">
+        {title}
+      </h3>
+
+      {/* Progress */}
+      <div className="flex justify-center my-4">
+        <div className="relative w-32 h-32">
           <svg className="w-full h-full rotate-[-90deg]">
-            <circle
-              cx="72"
-              cy="72"
-              r="60"
-              stroke="#E5E7EB"
-              strokeWidth="10"
-              fill="none"
-            />
+            <circle cx="64" cy="64" r="54" stroke="#E5E7EB" strokeWidth="10" fill="none" />
             <motion.circle
-              cx="72"
-              cy="72"
-              r="60"
+              cx="64"
+              cy="64"
+              r="54"
               stroke="#22C55E"
               strokeWidth="10"
               fill="none"
-              strokeDasharray={377}
-              strokeDashoffset={377 - (377 * progress) / 100}
+              strokeDasharray={339}
+              strokeDashoffset={339 - (339 * progress) / 100}
               strokeLinecap="round"
-              initial={{ strokeDashoffset: 377 }}
-              animate={{ strokeDashoffset: 377 - (377 * progress) / 100 }}
-              transition={{ duration: 1 }}
             />
           </svg>
-          <div className="absolute inset-0 flex items-center justify-center flex-col">
-            <span className="text-xs text-slate-400">Saved</span>
-            <span className="text-xl font-bold text-slate-800">
-              ${balance}
+
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-xs text-black">Saved</span>
+            <span className="font-bold text-black dark:text-black">
+              ₹{balance}
             </span>
           </div>
         </div>
@@ -57,19 +57,18 @@ export default function SavingsCard({
       {/* Stats */}
       <div className="grid grid-cols-3 text-center text-sm">
         <div>
-          <p className="font-semibold text-slate-700">${goal}</p>
-          <p className="text-slate-400 text-xs">Goal</p>
+          <p className="font-semibold text-black dark:text-black">₹{goal}</p>
+          <p className="text-black">Goal</p>
         </div>
         <div>
-          <p className="font-semibold text-slate-700">${remaining}</p>
-          <p className="text-slate-400 text-xs">Left</p>
+          <p className="font-semibold text-black dark:text-black">₹{remaining}</p>
+          <p className="text-black">Left</p>
         </div>
         <div>
-          <p className="font-semibold text-slate-700">{monthsLeft}</p>
-          <p className="text-slate-400 text-xs">Months</p>
+          <p className="font-semibold text-black dark:text-black">{monthsLeft}</p>
+          <p className="text-black">Months</p>
         </div>
       </div>
     </div>
   );
 }
-
